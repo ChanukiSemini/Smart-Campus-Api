@@ -80,46 +80,81 @@ http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1
 
 ---
 
-## Sample curl Commands
+## Sample Curl Commands
 
-### 1. Discovery endpoint
+### 1. Discovery Endpoint
 ```bash
-curl -X GET http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1
+curl -X GET http://localhost:8080/smart-campus-api/api/v1
 ```
 
-### 2. Get all rooms
+### 2. Get All Rooms
 ```bash
-curl -X GET http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1/rooms
+curl -X GET http://localhost:8080/smart-campus-api/api/v1/rooms
 ```
 
-### 3. Create a new room
+### 3. Create a New Room
 ```bash
-curl -X POST http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1/rooms -H "Content-Type: application/json" -d "{\"id\":\"CS-201\",\"name\":\"CS Seminar Room\",\"capacity\":25}"
+curl -X POST http://localhost:8080/smart-campus-api/api/v1/rooms -H "Content-Type: application/json" -d "{\"id\":\"CS-101\",\"name\":\"Computer Science Lab\",\"capacity\":40}"
 ```
 
-### 4. Filter sensors by type
+### 4. Get a Specific Room
 ```bash
-curl -X GET "http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1/sensors?type=CO2"
+curl -X GET http://localhost:8080/smart-campus-api/api/v1/rooms/LIB-301
 ```
 
-### 5. Post a reading to a sensor
+### 5. Delete a Room With No Sensors - Success 200
 ```bash
-curl -X POST http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1/sensors/TEMP-001/readings -H "Content-Type: application/json" -d "{\"value\":24.3}"
+curl -X DELETE http://localhost:8080/smart-campus-api/api/v1/rooms/CS-101
 ```
 
-### 6. Try to delete a room that has sensors (expect 409)
+### 6. Delete a Room That Has Sensors - 409 Conflict
 ```bash
-curl -X DELETE http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1/rooms/LIB-301
+curl -X DELETE http://localhost:8080/smart-campus-api/api/v1/rooms/LIB-301
 ```
 
-### 7. Post reading to MAINTENANCE sensor (expect 403)
+### 7. Get All Sensors
 ```bash
-curl -X POST http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1/sensors/TEMP-002/readings -H "Content-Type: application/json" -d "{\"value\":19.5}"
+curl -X GET http://localhost:8080/smart-campus-api/api/v1/sensors
 ```
 
-### 8. Create sensor with fake roomId (expect 422)
+### 8. Get Sensors Filtered by Type
 ```bash
-curl -X POST http://localhost:8080/smart-campus-api-1.0-SNAPSHOT/api/v1/sensors -H "Content-Type: application/json" -d "{\"id\":\"FAKE-001\",\"type\":\"CO2\",\"roomId\":\"FAKE-ROOM\"}"
+curl -X GET "http://localhost:8080/smart-campus-api/api/v1/sensors?type=Temperature"
+```
+
+### 9. Get a Specific Sensor
+```bash
+curl -X GET http://localhost:8080/smart-campus-api/api/v1/sensors/TEMP-001
+```
+
+### 10. Create a New Sensor
+```bash
+curl -X POST http://localhost:8080/smart-campus-api/api/v1/sensors -H "Content-Type: application/json" -d "{\"id\":\"HUM-001\",\"type\":\"Humidity\",\"status\":\"ACTIVE\",\"currentValue\":55.0,\"roomId\":\"LIB-301\"}"
+```
+
+### 11. Create Sensor With Invalid Room - 422 Unprocessable Entity
+```bash
+curl -X POST http://localhost:8080/smart-campus-api/api/v1/sensors -H "Content-Type: application/json" -d "{\"id\":\"TEMP-999\",\"type\":\"Temperature\",\"status\":\"ACTIVE\",\"currentValue\":0.0,\"roomId\":\"FAKE-ROOM\"}"
+```
+
+### 12. Get Sensor Reading History
+```bash
+curl -X GET http://localhost:8080/smart-campus-api/api/v1/sensors/TEMP-001/readings
+```
+
+### 13. Add a New Sensor Reading - Success 201
+```bash
+curl -X POST http://localhost:8080/smart-campus-api/api/v1/sensors/TEMP-001/readings -H "Content-Type: application/json" -d "{\"value\":24.5}"
+```
+
+### 14. Add Reading to MAINTENANCE Sensor - 403 Forbidden
+```bash
+curl -X POST http://localhost:8080/smart-campus-api/api/v1/sensors/TEMP-002/readings -H "Content-Type: application/json" -d "{\"value\":20.0}"
+```
+
+### 15. Trigger Global Error Handler - 500 Internal Server Error
+```bash
+curl -X GET http://localhost:8080/smart-campus-api/api/v1/test-error
 ```
 
 ---
