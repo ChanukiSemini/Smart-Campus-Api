@@ -165,13 +165,13 @@ curl -X GET http://localhost:8080/smart-campus-api/api/v1/test-error
 
 By default, JAX-RS creates a brand new instance of each resource class for every incoming HTTP request. This is called per-request scope. The motivation is thread safety  if one instance handled many concurrent requests, developers would need to carefully synchronize every field access, which is error-prone.
 
-The consequence for in-memory data storage is significant. If we stored rooms and sensors as instance fields on the resource class, they would be created fresh for every request and discarded immediately — every GET would return an empty list. To share state across requests, we use the Singleton pattern in DataStore. One DataStore instance is created when the JVM loads the class and persists for the entire server lifetime. Since it is shared across all resource instances and may be accessed concurrently, we use ConcurrentHashMap rather than HashMap. Regular HashMap is not thread-safe and can corrupt its internal structure when two threads write simultaneously.
+The consequence for in-memory data storage is significant. If we stored rooms and sensors as instance fields on the resource class, they would be created fresh for every request and discarded immediately, every GET would return an empty list. To share state across requests, we use the Singleton pattern in DataStore. One DataStore instance is created when the JVM loads the class and persists for the entire server lifetime. Since it is shared across all resource instances and may be accessed concurrently, we use ConcurrentHashMap rather than HashMap. Regular HashMap is not thread-safe and can corrupt its internal structure when two threads write simultaneously.
 
 ### Part 1.2 — HATEOAS and Hypermedia
 
-HATEOAS (Hypermedia As The Engine Of Application State) is the practice of including navigation links in API responses — similar to how web pages include hyperlinks. A discovery response tells a client that rooms live at /api/v1/rooms and sensors at /api/v1/sensors, rather than requiring the developer to read static documentation.
+HATEOAS (Hypermedia As The Engine Of Application State) is the practice of including navigation links in API responses (similar to how web pages include hyperlinks.) A discovery response tells a client that rooms live at /api/v1/rooms and sensors at /api/v1/sensors, rather than requiring the developer to read static documentation.
 
-This benefits client developers in several ways. First, clients become more resilient to URL changes — if the server reorganises its paths, clients following links adapt automatically. Second, new developers can discover available resources programmatically. Third, it reduces coupling between client and server — the client only needs to know one entry-point URL and the API guides the rest.
+This benefits client developers in several ways. First, clients become more resilient to URL changes. If the server reorganises its paths, clients following links adapt automatically. Second, new developers can discover available resources programmatically. Third, it reduces coupling between client and server. The client only needs to know one entry-point URL and the API guides the rest.
 
 ### Part 2.1 — Returning IDs vs Full Objects
 
@@ -191,11 +191,11 @@ Putting the type in the path such as /api/v1/sensors/type/CO2 creates a problem 
 
 ### Part 4.1 — Sub-Resource Locator Pattern Benefits
 
-Without the sub-resource locator pattern every nested path would be defined in one class. SensorResource would contain methods for listing sensors, creating sensors, fetching sensors, listing readings, and creating readings — growing into a large unfocused class. The locator pattern delegates responsibility — SensorResource handles sensor-level concerns and returns a SensorReadingResource instance for the /readings sub-path. Each class has a single clear responsibility, making both smaller and easier to maintain.
+Without the sub-resource locator pattern every nested path would be defined in one class. SensorResource would contain methods for listing sensors, creating sensors, fetching sensors, listing readings, and creating readings (growing into a large unfocused class). The locator pattern delegates responsibility ,SensorResource handles sensor-level concerns and returns a SensorReadingResource instance for the /readings sub-path. Each class has a single clear responsibility, making both smaller and easier to maintain.
 
 ### Part 5.2 — Why 422 is More Accurate Than 404
 
-404 Not Found means the URL you requested does not exist on this server. But when a client POSTs a sensor with a non-existent roomId, the URL /api/v1/sensors absolutely exists. The problem is that the content of the payload references an entity that does not exist. 422 Unprocessable Entity was defined precisely for this scenario — the request is syntactically valid JSON and the URL is correct, but the semantic meaning of the body is broken. Returning 422 gives the client developer a much more accurate signal.
+404 Not Found means the URL you requested does not exist on this server. But when a client POSTs a sensor with a non-existent roomId, the URL /api/v1/sensors absolutely exists. The problem is that the content of the payload references an entity that does not exist. 422 Unprocessable Entity was defined precisely for this scenario .The request is syntactically valid JSON and the URL is correct, but the semantic meaning of the body is broken. Returning 422 gives the client developer a much more accurate signal.
 
 ### Part 5.4 — Security Risks of Exposing Stack Traces
 
